@@ -1,3 +1,4 @@
+// lib/launch/routes.dart
 import 'package:flutter/material.dart';
 import 'splash_screen.dart';
 import 'login_page.dart';
@@ -10,8 +11,8 @@ import '../transactions/add_transaction.dart';
 import '../goals/goals_screen.dart';
 import '../home/add_expense.dart';
 import '../home/view_bills.dart';
-import '../side_menu/profile.dart'; // Import ProfilePage
-import '../side_menu/about.dart'; // Import AboutPage
+import '../side_menu/profile.dart';
+import '../side_menu/about.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   LoginPage.routeName: (context) => const LoginPage(),
@@ -24,8 +25,8 @@ final Map<String, WidgetBuilder> appRoutes = {
   GoalsScreen.routeName: (context) => const GoalsScreen(),
   ViewBillsScreen.routeName: (context) => const ViewBillsScreen(),
   AddExpenseScreen.routeName: (context) => const AddExpenseScreen(),
-  ProfilePage.routeName: (context) => const ProfilePage(), // ✅ Added ProfilePage
-  AboutPage.routeName: (context) => const AboutPage(), // ✅ Added AboutPage
+  ProfilePage.routeName: (context) => const ProfilePage(),
+  AboutPage.routeName: (context) => const AboutPage(),
 };
 
-// ❌ Removed `SplashScreen` from this map because it needs dynamic arguments.
+// Note: SplashScreen is excluded here since it requires dynamic arguments.

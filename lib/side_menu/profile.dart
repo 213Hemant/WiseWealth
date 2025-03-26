@@ -1,14 +1,22 @@
+// lib/side_menu/profile.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import '../animations/animations.dart'; // Import animations
-import '../theme/theme.dart'; // Import theme
+import 'package:provider/provider.dart';
+import '../animations/animations.dart';
+import '../theme/theme.dart';
+import '../providers/profile_provider.dart';
+import 'edit_profile_page.dart';
 
 class ProfilePage extends StatelessWidget {
-  static const String routeName = '/profile'; // Add this line
+  static const String routeName = '/profile';
 
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final profile = Provider.of<ProfileProvider>(context).profile;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Profile"),
@@ -20,24 +28,41 @@ class ProfilePage extends StatelessWidget {
           children: [
             Center(
               child: scaleIn(
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 50,
-                  backgroundImage: AssetImage('assets/profile.png'),
+                  backgroundImage: profile.imagePath != null
+                      ? FileImage(File(profile.imagePath!))
+                      : const AssetImage('assets/profile.png')
+                          as ImageProvider,
                 ),
               ),
             ),
             const SizedBox(height: 20),
             fadeIn(
               child: Text(
-                "User Name",
+                profile.name,
                 style: AppTheme.textTheme.displayLarge,
               ),
             ),
             const SizedBox(height: 10),
             fadeIn(
               child: Text(
-                "user@example.com",
+                profile.email,
                 style: AppTheme.textTheme.bodyLarge,
+              ),
+            ),
+            const SizedBox(height: 10),
+            fadeIn(
+              child: Text(
+                "Role: ${profile.role}",
+                style: AppTheme.textTheme.bodyMedium,
+              ),
+            ),
+            const SizedBox(height: 10),
+            fadeIn(
+              child: Text(
+                "Promotions: ${profile.subscribed ? 'Yes' : 'No'}",
+                style: AppTheme.textTheme.bodyMedium,
               ),
             ),
             const SizedBox(height: 20),
@@ -45,14 +70,23 @@ class ProfilePage extends StatelessWidget {
               child: ListTile(
                 leading: const Icon(Icons.edit),
                 title: const Text("Edit Profile"),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EditProfilePage(),
+                    ),
+                  );
+                },
               ),
             ),
             slideInFromLeft(
               child: ListTile(
                 leading: const Icon(Icons.lock),
                 title: const Text("Change Password"),
-                onTap: () {},
+                onTap: () {
+                  // Handle change password functionality
+                },
               ),
             ),
           ],
@@ -61,4 +95,3 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-
