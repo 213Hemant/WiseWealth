@@ -4,11 +4,22 @@ import 'launch/routes.dart';
 import 'theme/theme.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'providers/asset_provider.dart';
+import 'providers/profile_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   String connectionMessage = await connectToServer();
-  runApp(MyApp(connectionMessage: connectionMessage));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => AssetProvider()),
+      ],
+      child: MyApp(connectionMessage: connectionMessage),
+    ),
+  );
 }
 
 Future<String> connectToServer() async {
@@ -16,7 +27,6 @@ Future<String> connectToServer() async {
 
   try {
     final response = await http.get(Uri.parse(url));
-
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       return data['message'];
@@ -43,7 +53,8 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         if (settings.name == SplashScreen.routeName) {
           return MaterialPageRoute(
-            builder: (context) => SplashScreen(connectionMessage: connectionMessage),
+            builder: (context) =>
+                SplashScreen(connectionMessage: connectionMessage),
           );
         }
         if (appRoutes.containsKey(settings.name)) {
