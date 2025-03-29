@@ -1,6 +1,6 @@
 // lib/launch/routes.dart
 import 'package:flutter/material.dart';
-import 'splash_screen.dart';
+// import 'splash_screen.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
 import '../home/home_screen.dart';
