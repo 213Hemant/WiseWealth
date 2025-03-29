@@ -34,7 +34,8 @@ Future<String> connectToServer() async {
       return "Error: Server responded with status code ${response.statusCode}";
     }
   } catch (e) {
-    return "Connection failed: $e";
+    return "Connecting...";
+    // return "Connection failed: $e";
   }
 }
 
