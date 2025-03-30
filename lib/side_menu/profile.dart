@@ -1,4 +1,3 @@
-// lib/side_menu/profile.dart
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Profile"),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,8 +31,7 @@ class ProfilePage extends StatelessWidget {
                   radius: 50,
                   backgroundImage: profile.imagePath != null
                       ? FileImage(File(profile.imagePath!))
-                      : const AssetImage('assets/profile.png')
-                          as ImageProvider,
+                      : const AssetImage('assets/profile.png') as ImageProvider,
                 ),
               ),
             ),

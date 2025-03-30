@@ -1,30 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/profile_provider.dart';
+import 'providers/asset_provider.dart';
+import 'providers/transaction_provider.dart';
 import 'launch/splash_screen.dart';
 import 'launch/routes.dart';
 import 'theme/theme.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:provider/provider.dart';
-import 'providers/asset_provider.dart';
-import 'providers/profile_provider.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  String connectionMessage = await connectToServer();
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ProfileProvider()),
-        ChangeNotifierProvider(create: (_) => AssetProvider()),
-      ],
-      child: MyApp(connectionMessage: connectionMessage),
-    ),
-  );
-}
 
 Future<String> connectToServer() async {
   String url = "http://127.0.0.1:5000/"; // Replace with actual server IP
-
   try {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -35,8 +21,27 @@ Future<String> connectToServer() async {
     }
   } catch (e) {
     return "Connecting...";
-    // return "Connection failed: $e";
   }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  String connectionMessage = await connectToServer();
+
+  // Initialize TransactionProvider DB
+  final transactionProvider = TransactionProvider();
+  await transactionProvider.initDb();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => AssetProvider()),
+        ChangeNotifierProvider(create: (_) => transactionProvider),
+      ],
+      child: MyApp(connectionMessage: connectionMessage),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -61,7 +66,7 @@ class MyApp extends StatelessWidget {
         if (appRoutes.containsKey(settings.name)) {
           return MaterialPageRoute(builder: appRoutes[settings.name]!);
         }
-        return null; // Return null if no route found
+        return null;
       },
     );
   }
