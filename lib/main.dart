@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'providers/profile_provider.dart';
 import 'providers/asset_provider.dart';
 import 'providers/transaction_provider.dart';
+import 'providers/goal_provider.dart';
 import 'launch/splash_screen.dart';
 import 'launch/routes.dart';
 import 'theme/theme.dart';
@@ -38,6 +39,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => AssetProvider()),
         ChangeNotifierProvider(create: (_) => transactionProvider),
+        ChangeNotifierProvider(create: (_) => GoalProvider()..initDb()),
       ],
       child: MyApp(connectionMessage: connectionMessage),
     ),

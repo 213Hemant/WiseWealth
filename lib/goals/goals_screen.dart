@@ -1,9 +1,12 @@
+// lib/goals/goals_screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'goals_widgets.dart';
 import 'new_goal_screen.dart';
 import '../home/bottom_navbar.dart';
 import '../animations/animations.dart'; // Import reusable animations
 import '../animations/transitions.dart'; // Import reusable animations
+import '../providers/goal_provider.dart';
 
 class GoalsScreen extends StatelessWidget {
   static const String routeName = '/goals';
@@ -12,6 +15,8 @@ class GoalsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ensure that GoalProvider is accessible.
+    final goalProvider = Provider.of<GoalProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Your Goals"),
@@ -36,7 +41,7 @@ class GoalsScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            slideUpTransition(const NewGoalScreen()), // Smooth slide-up transition
+            slideUpTransition(const NewGoalScreen()),
           );
         },
         label: const Text("Add Goal"),

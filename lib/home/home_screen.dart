@@ -23,14 +23,14 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header Section with fade-in animation
+              // Header Section with fade-in animation.
               fadeIn(child: const HeaderSection()),
               const SizedBox(height: 16),
-              // Spending Summary Section with slide-in from bottom animation
+              // Spending Summary Section with slide-in from bottom animation.
               slideInFromBottom(child: const SpendingSummarySection()),
               const SizedBox(height: 16),
-              // Buttons Section with scale-in animation
-              scaleIn(child: ButtonsSection()),
+              // Buttons Section with scale-in animation.
+              scaleIn(child: const ButtonsSection()),
             ],
           ),
         ),
