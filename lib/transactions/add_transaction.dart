@@ -82,7 +82,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   items: const [
                     DropdownMenuItem(value: "Food", child: Text("Food")),
                     DropdownMenuItem(value: "Shopping", child: Text("Shopping")),
-                    DropdownMenuItem(value: "Salary", child: Text("Salary")),
+                    DropdownMenuItem(value: "Bill", child: Text("Bill")),
+                    DropdownMenuItem(value: "Rent", child: Text("Rent")),
+                    DropdownMenuItem(value: "Other", child: Text("Other")),
                   ],
                   onChanged: (value) => setState(() => _selectedCategory = value),
                   validator: (value) => value == null ? "Select category" : null,

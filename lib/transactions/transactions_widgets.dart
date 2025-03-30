@@ -40,9 +40,12 @@ class TransactionSummarySection extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
+                  // _summaryText(
+                  //   "Income: ₹${transactionProvider.totalIncome.toStringAsFixed(2)}",
+                  //   color: Colors.green,
+                  // ),
                   _summaryText(
-                    "Income: ₹${transactionProvider.totalIncome.toStringAsFixed(2)}",
-                    color: Colors.green,
+                    "Budget: ₹${transactionProvider.budget.toStringAsFixed(2)}",
                   ),
                   _summaryText(
                     "Expenses: ₹${transactionProvider.totalExpenses.toStringAsFixed(2)}",
@@ -50,9 +53,6 @@ class TransactionSummarySection extends StatelessWidget {
                   ),
                   _summaryText(
                     "Remaining: ₹${transactionProvider.remaining.toStringAsFixed(2)}",
-                  ),
-                  _summaryText(
-                    "Budget: ₹${transactionProvider.budget.toStringAsFixed(2)}",
                   ),
                 ],
               ),

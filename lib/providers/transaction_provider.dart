@@ -18,7 +18,7 @@ class TransactionProvider extends ChangeNotifier {
   double? get manualBudget => _manualBudget;
 
   // For demonstration, we still have a default budget if none is set manually.
-  static const double defaultBudget = 1000.0;
+  static const double defaultBudget = 10000.0;
 
   List<TransactionModel> get transactions => _transactions;
 
@@ -32,7 +32,7 @@ class TransactionProvider extends ChangeNotifier {
   double get totalExpenses => _manualExpenses ?? computedExpenses;
   double get budget => _manualBudget ?? defaultBudget;
 
-  double get remaining => totalIncome - totalExpenses;
+  double get remaining => budget - totalExpenses;
 
   Future<void> initDb() async {
     final databasesPath = await getDatabasesPath();

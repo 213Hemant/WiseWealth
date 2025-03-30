@@ -43,20 +43,32 @@ class _ManualAdjustScreenState extends State<ManualAdjustScreen> {
           child: ListView(
             children: [
               const Text(
-                "Override Values",
+                "Set Your Finances Manually: ",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
+              // TextFormField(
+              //   controller: _incomeController,
+              //   decoration: const InputDecoration(
+              //     labelText: "Income",
+              //     border: OutlineInputBorder(),
+              //   ),
+              //   keyboardType: TextInputType.number,
+              //   validator: (value) =>
+              //       (value == null || double.tryParse(value) == null)
+              //           ? "Enter a valid income"
+              //           : null,
+              // ),
               TextFormField(
-                controller: _incomeController,
+                controller: _budgetController,
                 decoration: const InputDecoration(
-                  labelText: "Income",
+                  labelText: "Budget",
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) =>
                     (value == null || double.tryParse(value) == null)
-                        ? "Enter a valid income"
+                        ? "Enter a valid budget"
                         : null,
               ),
               const SizedBox(height: 16),
@@ -73,18 +85,6 @@ class _ManualAdjustScreenState extends State<ManualAdjustScreen> {
                         : null,
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _budgetController,
-                decoration: const InputDecoration(
-                  labelText: "Budget",
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) =>
-                    (value == null || double.tryParse(value) == null)
-                        ? "Enter a valid budget"
-                        : null,
-              ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
