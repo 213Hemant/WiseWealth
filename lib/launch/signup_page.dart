@@ -1,11 +1,44 @@
 import 'package:flutter/material.dart';
 import '../launch/login_page.dart';
 import '../animations/transitions.dart'; // Import transitions
+import '../services/auth_service.dart'; // Import AuthService
 
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
   static const String routeName = '/signup';
 
   const SignupPage({super.key});
+
+  @override
+  _SignupPageState createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  final AuthService _authService = AuthService();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
+  void _signUp() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match")),
+      );
+      return;
+    }
+    var user = await _authService.signUp(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+    if (user != null) {
+      // For demonstration, navigate to login; in your app, you might navigate to the home screen.
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Sign Up failed")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +57,7 @@ class SignupPage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               TextField(
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   labelText: "Email",
@@ -34,6 +68,7 @@ class SignupPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               TextField(
+                controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Password",
@@ -44,6 +79,7 @@ class SignupPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               TextField(
+                controller: _confirmPasswordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
@@ -54,10 +90,7 @@ class SignupPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
-                  // Navigate to Login with Slide Transition
-                  Navigator.pushReplacement(context, slideTransition(const LoginPage(), fromRight: false));
-                },
+                onPressed: _signUp,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
@@ -66,8 +99,8 @@ class SignupPage extends StatelessWidget {
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () {
-                  // Navigate back to Login with Slide Transition
-                  Navigator.pushReplacement(context, slideTransition(const LoginPage(), fromRight: false));
+                  Navigator.pushReplacement(context,
+                      slideTransition(const LoginPage(), fromRight: false));
                 },
                 child: const Text(
                   "Already have an account? Login",
