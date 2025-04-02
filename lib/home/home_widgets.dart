@@ -5,7 +5,7 @@ import 'package:wisewealth/providers/asset_provider.dart';
 import 'package:wisewealth/providers/transaction_provider.dart';
 import './add_expense.dart';
 import './view_bills.dart';
-import '../animations/animations.dart'; // Import reusable animations
+import '../animations/animations.dart'; // Reusable animations
 import '../animations/transitions.dart';
 
 /// Header section displays a greeting and the user's net worth.
@@ -14,30 +14,35 @@ class HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get user's name from ProfileProvider and net worth from AssetProvider.
-    final profile = Provider.of<ProfileProvider>(context).profile;
-    final netWorth = Provider.of<AssetProvider>(context).totalAssets;
-
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Good Morning, ${profile.name}!",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    return Consumer2<ProfileProvider, AssetProvider>(
+      builder: (context, profileProvider, assetProvider, _) {
+        final profile = profileProvider.profile;
+        final netWorth = assetProvider.totalAssets;
+        return Card(
+          elevation: 3,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Good Morning, ${profile.name}!",
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Net Worth: ₹${netWorth.toStringAsFixed(2)}",
+                  style: const TextStyle(
+                      fontSize: 18, color: Colors.blueAccent),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              "Net Worth: ₹${netWorth.toStringAsFixed(2)}",
-              style: const TextStyle(fontSize: 18, color: Colors.blueAccent),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -48,56 +53,58 @@ class SpendingSummarySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final txnProvider = Provider.of<TransactionProvider>(context);
-    // Filter expenses for current month and year.
-    final now = DateTime.now();
-    final monthExpenses = txnProvider.transactions
-        .where((txn) =>
-            txn.type == "Expense" &&
-            txn.date.month == now.month &&
-            txn.date.year == now.year)
-        .fold(0.0, (prev, txn) => prev + txn.amount);
-    // Use the provider's budget if available; otherwise, default to 1000.
-    final budget = txnProvider.budget;
-    final double spentPercent = (budget > 0) ? (monthExpenses / budget).clamp(0, 1) : 0.0;
-
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer<TransactionProvider>(
+      builder: (context, txnProvider, _) {
+        final now = DateTime.now();
+        final monthExpenses = txnProvider.transactions
+            .where((txn) =>
+                txn.type == "Expense" &&
+                txn.date.month == now.month &&
+                txn.date.year == now.year)
+            .fold(0.0, (prev, txn) => prev + txn.amount);
+        final budget = txnProvider.budget;
+        final double spentPercent =
+            (budget > 0) ? (monthExpenses / budget).clamp(0, 1) : 0.0;
+        return Card(
+          elevation: 3,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
               children: [
-                Flexible(
-                  child: Text(
-                    "Spent this Month: ₹${monthExpenses.toStringAsFixed(2)} / ₹${budget.toStringAsFixed(2)}",
-                    style: const TextStyle(fontSize: 16),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        "Spent this Month: ₹${monthExpenses.toStringAsFixed(2)} / ₹${budget.toStringAsFixed(2)}",
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    Text(
+                      "${(spentPercent * 100).toStringAsFixed(0)}%",
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
-                Text(
-                  "${(spentPercent * 100).toStringAsFixed(0)}%",
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                const SizedBox(height: 8),
+                LinearProgressIndicator(
+                  value: spentPercent,
+                  color: Colors.blueAccent,
+                  backgroundColor: Colors.grey[300],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "2 Bills Due This Week",
+                  style: TextStyle(fontSize: 16),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: spentPercent,
-              color: Colors.blueAccent,
-              backgroundColor: Colors.grey[300],
-            ),
-            const SizedBox(height: 16),
-            // For demo, bills due are statically calculated.
-            const Text(
-              "2 Bills Due This Week",
-              style: TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

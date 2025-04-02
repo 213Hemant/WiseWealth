@@ -12,30 +12,32 @@ class TotalAssetsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final assetProvider = Provider.of<AssetProvider>(context);
-    return RepaintBoundary(
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Total Assets",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "₹${assetProvider.totalAssets.toStringAsFixed(2)}",
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
+    return Consumer<AssetProvider>(
+      builder: (context, assetProvider, _) => RepaintBoundary(
+        child: Card(
+          elevation: 3,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Total Assets",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  "₹${assetProvider.totalAssets.toStringAsFixed(2)}",
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -63,68 +65,78 @@ class PieChartSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final assetProvider = Provider.of<AssetProvider>(context);
-    final distribution = assetProvider.assetDistribution;
+    return Consumer<AssetProvider>(
+      builder: (context, assetProvider, _) {
+        final distribution = assetProvider.assetDistribution;
 
-    if (assetProvider.totalAssets == 0) {
-      return const Text("No assets to display allocation.");
-    }
+        if (assetProvider.totalAssets == 0 || distribution.isEmpty) {
+          return const Center(
+              child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text("No assets to display allocation."),
+          ));
+        }
 
-    // Generate sections for the PieChart.
-    final sections = distribution.entries.map((entry) {
-      final percentage = (entry.value / assetProvider.totalAssets) * 100;
-      return PieChartSectionData(
-        value: entry.value,
-        title: "${entry.key}\n${percentage.toStringAsFixed(1)}%",
-        color: _getColor(entry.key),
-        radius: 50,
-        titleStyle: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      );
-    }).toList();
+        // Generate sections for the PieChart.
+        final sections = distribution.entries.map((entry) {
+          final percentage =
+              (entry.value / assetProvider.totalAssets) * 100;
+          return PieChartSectionData(
+            value: entry.value,
+            title: "${entry.key}\n${percentage.toStringAsFixed(1)}%",
+            color: _getColor(entry.key),
+            radius: 50,
+            titleStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          );
+        }).toList();
 
-    return GestureDetector(
-      onTap: () {
-        // Navigate to a detailed asset allocation view.
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const AssetAllocationDetailScreen(),
+        return GestureDetector(
+          onTap: () {
+            // Navigate to a detailed asset allocation view.
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const AssetAllocationDetailScreen(),
+              ),
+            );
+          },
+          child: RepaintBoundary(
+            child: Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    const Text(
+                      "Asset Allocation",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 200,
+                      child: PieChart(
+                        PieChartData(
+                          sections: sections,
+                          sectionsSpace: 2,
+                          centerSpaceRadius: 40,
+                          pieTouchData: PieTouchData(enabled: true),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         );
       },
-      child: RepaintBoundary(
-        child: Card(
-          elevation: 3,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                const Text(
-                  "Asset Allocation",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 200,
-                  child: PieChart(
-                    PieChartData(
-                      sections: sections,
-                      sectionsSpace: 2,
-                      centerSpaceRadius: 40,
-                      pieTouchData: PieTouchData(enabled: true),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -137,7 +149,6 @@ class AssetGrowthGraphSection extends StatelessWidget {
 
   // Generate spots from net worth history.
   List<FlSpot> _generateSpotsFromHistory(List netWorthHistory) {
-    // Create a copy so we don't modify the original list
     final history = List.from(netWorthHistory);
     history.sort((a, b) => a.timestamp.compareTo(b.timestamp));
     return history.map<FlSpot>((event) {
@@ -150,150 +161,158 @@ class AssetGrowthGraphSection extends StatelessWidget {
 
   // Format timestamp as HH:mm.
   String _formatTimestamp(double timestamp) {
-    final DateTime time = DateTime.fromMillisecondsSinceEpoch(timestamp.toInt());
+    final DateTime time =
+        DateTime.fromMillisecondsSinceEpoch(timestamp.toInt());
     return DateFormat.Hm().format(time);
   }
 
   @override
   Widget build(BuildContext context) {
-    final assetProvider = Provider.of<AssetProvider>(context);
-    final netWorthHistory = assetProvider.netWorthHistory;
+    return Consumer<AssetProvider>(
+      builder: (context, assetProvider, _) {
+        final netWorthHistory = assetProvider.netWorthHistory;
 
-    if (netWorthHistory.isEmpty) {
-      return const Text("No data to display asset growth.");
-    }
+        if (netWorthHistory.isEmpty) {
+          return const Center(
+              child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text("No data to display asset growth."),
+          ));
+        }
 
-    // Show a sliding window of the last 10 events if there are more than 10.
-    final recentHistory = netWorthHistory.length > 10
-        ? netWorthHistory.sublist(netWorthHistory.length - 10)
-        : netWorthHistory;
-    final spots = _generateSpotsFromHistory(recentHistory);
+        // Limit to the most recent 10 events.
+        final recentHistory = netWorthHistory.length > 10
+            ? netWorthHistory.sublist(netWorthHistory.length - 10)
+            : netWorthHistory;
+        final spots = _generateSpotsFromHistory(recentHistory);
 
-    // Determine chart boundaries.
-    final double minX = spots.first.x;
-    final double maxX = spots.last.x;
-    double minY = spots.first.y;
-    double maxY = spots.first.y;
-    for (var spot in spots) {
-      if (spot.y < minY) minY = spot.y;
-      if (spot.y > maxY) maxY = spot.y;
-    }
-    // Ensure intervals are not zero.
-    final double intervalX = (maxX - minX) == 0 ? 1 : (maxX - minX) / 4;
-    final double intervalY = (maxY - minY) == 0 ? 1 : (maxY - minY) / 4;
+        // Determine chart boundaries.
+        final double minX = spots.first.x;
+        final double maxX = spots.last.x;
+        double minY = spots.first.y;
+        double maxY = spots.first.y;
+        for (var spot in spots) {
+          if (spot.y < minY) minY = spot.y;
+          if (spot.y > maxY) maxY = spot.y;
+        }
+        final double intervalX = (maxX - minX) == 0 ? 1 : (maxX - minX) / 4;
+        final double intervalY = (maxY - minY) == 0 ? 1 : (maxY - minY) / 4;
 
-    return GestureDetector(
-      onTap: () {
-        // Navigate to a detailed asset growth view.
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const AssetGrowthDetailScreen()),
-        );
-      },
-      child: RepaintBoundary(
-        child: Card(
-          elevation: 3,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                const Text(
-                  "Asset Growth Over Time",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 220,
-                  child: LineChart(
-                    LineChartData(
-                      minX: minX,
-                      maxX: maxX,
-                      minY: minY * 0.95,
-                      maxY: maxY * 1.05,
-                      // Interaction / tooltip
-                      lineTouchData: LineTouchData(
-                        handleBuiltInTouches: true,
-                        touchTooltipData: LineTouchTooltipData(
-                          getTooltipItems: (touchedSpots) {
-                            return touchedSpots.map((spot) {
-                              return LineTooltipItem(
-                                "${_formatTimestamp(spot.x)}\n₹${spot.y.toStringAsFixed(2)}",
-                                const TextStyle(color: Colors.white),
-                              );
-                            }).toList();
-                          },
-                        ),
-                      ),
-                      borderData: FlBorderData(show: false),
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        horizontalInterval: intervalY,
-                        getDrawingHorizontalLine: (value) {
-                          return FlLine(
-                            color: Colors.grey.shade300,
-                            strokeWidth: 1,
-                            dashArray: [5, 5],
-                          );
-                        },
-                      ),
-                      titlesData: FlTitlesData(
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 32,
-                            interval: intervalX,
-                            getTitlesWidget: (value, meta) => Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text(
-                                _formatTimestamp(value),
-                                style: const TextStyle(fontSize: 10),
-                              ),
+        return GestureDetector(
+          onTap: () {
+            // Navigate to a detailed asset growth view.
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => const AssetGrowthDetailScreen()),
+            );
+          },
+          child: RepaintBoundary(
+            child: Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    const Text(
+                      "Asset Growth Over Time",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 220,
+                      child: LineChart(
+                        LineChartData(
+                          minX: minX,
+                          maxX: maxX,
+                          minY: minY * 0.95,
+                          maxY: maxY * 1.05,
+                          lineTouchData: LineTouchData(
+                            handleBuiltInTouches: true,
+                            touchTooltipData: LineTouchTooltipData(
+                              getTooltipItems: (touchedSpots) {
+                                return touchedSpots.map((spot) {
+                                  return LineTooltipItem(
+                                    "${_formatTimestamp(spot.x)}\n₹${spot.y.toStringAsFixed(2)}",
+                                    const TextStyle(color: Colors.white),
+                                  );
+                                }).toList();
+                              },
                             ),
                           ),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 40,
-                            interval: intervalY,
-                            getTitlesWidget: (value, meta) {
-                              return Text(
-                                "₹${value.toStringAsFixed(0)}",
-                                style: const TextStyle(fontSize: 10),
+                          borderData: FlBorderData(show: false),
+                          gridData: FlGridData(
+                            show: true,
+                            drawVerticalLine: false,
+                            horizontalInterval: intervalY,
+                            getDrawingHorizontalLine: (value) {
+                              return FlLine(
+                                color: Colors.grey.shade300,
+                                strokeWidth: 1,
+                                dashArray: [5, 5],
                               );
                             },
                           ),
-                        ),
-                        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      ),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: spots,
-                          isCurved: true,
-                          preventCurveOverShooting: true,
-                          barWidth: 3,
-                          color: Colors.blue,
-                          dotData: FlDotData(show: false),
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color: Colors.blue.withOpacity(0.2),
+                          titlesData: FlTitlesData(
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 32,
+                                interval: intervalX,
+                                getTitlesWidget: (value, meta) => Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Text(
+                                    _formatTimestamp(value),
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 40,
+                                interval: intervalY,
+                                getTitlesWidget: (value, meta) {
+                                  return Text(
+                                    "₹${value.toStringAsFixed(0)}",
+                                    style: const TextStyle(fontSize: 10),
+                                  );
+                                },
+                              ),
+                            ),
+                            rightTitles:
+                                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            topTitles:
+                                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                           ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: spots,
+                              isCurved: true,
+                              preventCurveOverShooting: true,
+                              barWidth: 3,
+                              color: Colors.blue,
+                              dotData: const FlDotData(show: false),
+                              belowBarData: BarAreaData(
+                                show: true,
+                                color: Colors.blue.withOpacity(0.2),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                    // Note: Animation properties commented out as they are optional.
-                    // swapAnimationDuration: const Duration(milliseconds: 800),
-                    // swapAnimationCurve: Curves.easeInOut,
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -317,34 +336,40 @@ class RecentAssetsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final assetProvider = Provider.of<AssetProvider>(context);
-    final recentAssets = assetProvider.recentAssets;
-    return RepaintBoundary(
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Recent Assets",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return Consumer<AssetProvider>(
+      builder: (context, assetProvider, _) {
+        final recentAssets = assetProvider.recentAssets;
+        return RepaintBoundary(
+          child: Card(
+            elevation: 3,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Recent Assets",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const Divider(),
+                  if (recentAssets.isNotEmpty)
+                    ...recentAssets.map((asset) => ListTile(
+                          leading: Icon(_getIconForAsset(asset)),
+                          title: Text(asset.name),
+                          subtitle:
+                              Text("₹${asset.value.toStringAsFixed(2)}"),
+                        ))
+                  else
+                    const Text("No recent assets added."),
+                ],
               ),
-              const Divider(),
-              if (recentAssets.isNotEmpty)
-                ...recentAssets.map((asset) => ListTile(
-                      leading: Icon(_getIconForAsset(asset)),
-                      title: Text(asset.name),
-                      subtitle: Text("₹${asset.value.toStringAsFixed(2)}"),
-                    ))
-              else
-                const Text("No recent assets added."),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

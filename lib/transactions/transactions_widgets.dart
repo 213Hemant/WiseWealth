@@ -12,63 +12,63 @@ class TransactionSummarySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final transactionProvider = Provider.of<TransactionProvider>(context);
-
-    return GestureDetector(
-      onTap: () {
-        // Navigate to ManualAdjustScreen
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ManualAdjustScreen()),
-        );
-      },
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Transaction Summary",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              // Use a Wrap or Row with Flexible to avoid overflow
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  // _summaryText(
-                  //   "Income: ₹${transactionProvider.totalIncome.toStringAsFixed(2)}",
-                  //   color: Colors.green,
-                  // ),
-                  _summaryText(
-                    "Budget: ₹${transactionProvider.budget.toStringAsFixed(2)}",
-                  ),
-                  _summaryText(
-                    "Expenses: ₹${transactionProvider.totalExpenses.toStringAsFixed(2)}",
-                    color: Colors.red,
-                  ),
-                  _summaryText(
-                    "Remaining: ₹${transactionProvider.remaining.toStringAsFixed(2)}",
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              LinearProgressIndicator(
-                value: transactionProvider.budget == 0
-                    ? 0
-                    : (transactionProvider.totalExpenses / transactionProvider.budget)
-                        .clamp(0, 1),
-                minHeight: 8,
-                backgroundColor: Colors.grey.shade300,
-                color: (transactionProvider.totalExpenses <= transactionProvider.budget)
-                    ? Colors.blue
-                    : Colors.red,
-              ),
-            ],
+    return Consumer<TransactionProvider>(
+      builder: (context, transactionProvider, _) => GestureDetector(
+        onTap: () {
+          // Navigate to ManualAdjustScreen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const ManualAdjustScreen(),
+            ),
+          );
+        },
+        child: Card(
+          elevation: 3,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Transaction Summary",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _summaryText(
+                      "Budget: ₹${transactionProvider.budget.toStringAsFixed(2)}",
+                    ),
+                    _summaryText(
+                      "Expenses: ₹${transactionProvider.totalExpenses.toStringAsFixed(2)}",
+                      color: Colors.red,
+                    ),
+                    _summaryText(
+                      "Remaining: ₹${transactionProvider.remaining.toStringAsFixed(2)}",
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                LinearProgressIndicator(
+                  value: transactionProvider.budget == 0
+                      ? 0
+                      : (transactionProvider.totalExpenses /
+                              transactionProvider.budget)
+                          .clamp(0, 1),
+                  minHeight: 8,
+                  backgroundColor: Colors.grey.shade300,
+                  color: (transactionProvider.totalExpenses <=
+                          transactionProvider.budget)
+                      ? Colors.blue
+                      : Colors.red,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -89,9 +89,9 @@ class TransactionSummarySection extends StatelessWidget {
 
 /// FilterSection handles user taps to sort transactions by Category, Date, or Type.
 class FilterSection extends StatelessWidget {
-  final Function onCategoryTap;
-  final Function onDateTap;
-  final Function onTypeTap;
+  final VoidCallback onCategoryTap;
+  final VoidCallback onDateTap;
+  final VoidCallback onTypeTap;
 
   const FilterSection({
     super.key,
@@ -111,15 +111,15 @@ class FilterSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             OutlinedButton(
-              onPressed: () => onCategoryTap(),
+              onPressed: onCategoryTap,
               child: const Text("Category"),
             ),
             OutlinedButton(
-              onPressed: () => onDateTap(),
+              onPressed: onDateTap,
               child: const Text("Date"),
             ),
             OutlinedButton(
-              onPressed: () => onTypeTap(),
+              onPressed: onTypeTap,
               child: const Text("Type"),
             ),
           ],
@@ -164,7 +164,8 @@ class TransactionsListSection extends StatelessWidget {
                 return ListTile(
                   leading: Icon(icon, color: iconColor),
                   title: Text(transaction.name),
-                  subtitle: Text("${transaction.type} - ₹${transaction.amount.toStringAsFixed(2)}"),
+                  subtitle: Text(
+                      "${transaction.type} - ₹${transaction.amount.toStringAsFixed(2)}"),
                   trailing: _DeleteTransactionButton(transaction: transaction),
                 );
               }).toList()
@@ -184,31 +185,34 @@ class _DeleteTransactionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final transactionProvider = Provider.of<TransactionProvider>(context);
-    return IconButton(
-      icon: const Icon(Icons.delete, color: Colors.red),
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text("Confirm Delete"),
-            content: const Text("Are you sure you want to delete this transaction?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text("Cancel"),
-              ),
-              TextButton(
-                onPressed: () {
-                  transactionProvider.deleteTransaction(transaction.id!);
-                  Navigator.of(ctx).pop();
-                },
-                child: const Text("Delete", style: TextStyle(color: Colors.red)),
-              ),
-            ],
-          ),
-        );
-      },
+    return Consumer<TransactionProvider>(
+      builder: (context, transactionProvider, _) => IconButton(
+        icon: const Icon(Icons.delete, color: Colors.red),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text("Confirm Delete"),
+              content: const Text(
+                  "Are you sure you want to delete this transaction?"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    transactionProvider.deleteTransaction(transaction.id!);
+                    Navigator.of(ctx).pop();
+                  },
+                  child: const Text("Delete",
+                      style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

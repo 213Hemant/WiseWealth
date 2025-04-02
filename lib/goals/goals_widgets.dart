@@ -1,4 +1,3 @@
-// lib/goals/goals_widgets.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/goal_provider.dart';
@@ -10,75 +9,79 @@ class GoalsSummarySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final goalProvider = Provider.of<GoalProvider>(context);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blueGrey.shade50,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          // Using Table to automatically allocate space without truncation.
-          Table(
-            columnWidths: const {
-              0: FlexColumnWidth(1),
-              1: FlexColumnWidth(1),
-            },
-            children: [
-              TableRow(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Text(
-                      "Total Goals: ${goalProvider.totalGoals}",
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return Consumer<GoalProvider>(
+      builder: (context, goalProvider, _) => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.blueGrey.shade50,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            // Using Table to automatically allocate space without truncation.
+            Table(
+              columnWidths: const {
+                0: FlexColumnWidth(1),
+                1: FlexColumnWidth(1),
+              },
+              children: [
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(
+                        "Total Goals: ${goalProvider.totalGoals}",
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Text(
-                      "${goalProvider.completedGoals} Completed",
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.right,
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(
+                        "${goalProvider.completedGoals} Completed",
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.right,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              TableRow(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Text(
-                      "Overall Progress: ${(goalProvider.overallProgress * 100).toStringAsFixed(0)}%",
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(
+                        "Overall Progress: ${(goalProvider.overallProgress * 100).toStringAsFixed(0)}%",
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Text(
-                      "Remaining: ₹${goalProvider.remainingAmount.toStringAsFixed(2)}",
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.right,
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(
+                        "Remaining: ₹${goalProvider.remainingAmount.toStringAsFixed(2)}",
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.right,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          LinearProgressIndicator(
-            value: goalProvider.overallProgress,
-            minHeight: 8,
-            color: Colors.green,
-            backgroundColor: const Color.fromARGB(89, 129, 245, 133),
-          ),
-        ],
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            LinearProgressIndicator(
+              value: goalProvider.overallProgress,
+              minHeight: 8,
+              color: Colors.green,
+              backgroundColor: const Color.fromARGB(89, 129, 245, 133),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-
 
 /// Section displaying active goals.
 class ActiveGoalsSection extends StatelessWidget {
@@ -86,21 +89,27 @@ class ActiveGoalsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final goalProvider = Provider.of<GoalProvider>(context);
-    final activeGoals = goalProvider.goals.where((goal) => !goal.isCompleted).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Active Goals",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        if (activeGoals.isNotEmpty)
-          ...activeGoals.map((goal) => ActiveGoalItem(goal: goal)).toList()
-        else
-          const Text("No active goals."),
-      ],
+    return Consumer<GoalProvider>(
+      builder: (context, goalProvider, _) {
+        final activeGoals =
+            goalProvider.goals.where((goal) => !goal.isCompleted).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Active Goals",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            if (activeGoals.isNotEmpty)
+              ...activeGoals
+                  .map((goal) => ActiveGoalItem(goal: goal))
+                  .toList()
+            else
+              const Text("No active goals."),
+          ],
+        );
+      },
     );
   }
 }
@@ -124,7 +133,6 @@ class ActiveGoalItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final goalProvider = Provider.of<GoalProvider>(context, listen: false);
     final timeProgress = _calculateTimeProgress();
     final double progressTaken = (goal.savedAmount / goal.targetAmount).clamp(0, 1);
 
@@ -143,12 +151,14 @@ class ActiveGoalItem extends StatelessWidget {
                 Expanded(
                   child: Text(
                     goal.name,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Text(
                   "Target: ₹${goal.targetAmount.toStringAsFixed(2)}",
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -202,7 +212,7 @@ class ActiveGoalItem extends StatelessWidget {
                   icon: const Icon(Icons.edit, size: 18),
                   label: const Text("Update"),
                   onPressed: () {
-                    _showUpdateProgressDialog(context, goal, goalProvider);
+                    _showUpdateProgressDialog(context, goal);
                   },
                 ),
                 TextButton.icon(
@@ -211,7 +221,6 @@ class ActiveGoalItem extends StatelessWidget {
                   onPressed: () async {
                     // Check if goal progress is less than 100%
                     if (progressTaken < 1) {
-                      // Ask for confirmation to mark as complete despite incomplete progress.
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => AlertDialog(
@@ -225,13 +234,13 @@ class ActiveGoalItem extends StatelessWidget {
                             ),
                             TextButton(
                               onPressed: () => Navigator.of(ctx).pop(true),
-                              child: const Text("Confirm", style: TextStyle(color: Colors.green)),
+                              child: const Text("Confirm",
+                                  style: TextStyle(color: Colors.green)),
                             ),
                           ],
                         ),
                       );
                       if (confirm != true) return;
-                      // If confirmed, update savedAmount to targetAmount
                       final updatedGoal = Goal(
                         id: goal.id,
                         name: goal.name,
@@ -240,9 +249,9 @@ class ActiveGoalItem extends StatelessWidget {
                         targetDate: goal.targetDate,
                         isCompleted: true,
                       );
-                      await goalProvider.updateGoal(updatedGoal);
+                      await Provider.of<GoalProvider>(context, listen: false)
+                          .updateGoal(updatedGoal);
                     } else {
-                      // Progress is 100% – mark goal as complete.
                       final updatedGoal = Goal(
                         id: goal.id,
                         name: goal.name,
@@ -251,14 +260,15 @@ class ActiveGoalItem extends StatelessWidget {
                         targetDate: goal.targetDate,
                         isCompleted: true,
                       );
-                      await goalProvider.updateGoal(updatedGoal);
+                      await Provider.of<GoalProvider>(context, listen: false)
+                          .updateGoal(updatedGoal);
                     }
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
-                    _confirmDelete(context, goal, goalProvider);
+                    _confirmDelete(context, goal);
                   },
                 ),
               ],
@@ -270,8 +280,9 @@ class ActiveGoalItem extends StatelessWidget {
   }
 
   // Dialog to update saved amount (goal progress)
-  void _showUpdateProgressDialog(BuildContext context, Goal goal, GoalProvider provider) {
-    final _progressController = TextEditingController(text: goal.savedAmount.toString());
+  void _showUpdateProgressDialog(BuildContext context, Goal goal) {
+    final _progressController =
+        TextEditingController(text: goal.savedAmount.toString());
     showDialog(
       context: context,
       builder: (ctx) {
@@ -299,7 +310,8 @@ class ActiveGoalItem extends StatelessWidget {
                     targetDate: goal.targetDate,
                     isCompleted: goal.isCompleted,
                   );
-                  await provider.updateGoal(updatedGoal);
+                  await Provider.of<GoalProvider>(context, listen: false)
+                      .updateGoal(updatedGoal);
                 }
                 Navigator.of(ctx).pop();
               },
@@ -312,7 +324,7 @@ class ActiveGoalItem extends StatelessWidget {
   }
 
   // Confirm deletion dialog.
-  void _confirmDelete(BuildContext context, Goal goal, GoalProvider provider) {
+  void _confirmDelete(BuildContext context, Goal goal) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -325,10 +337,12 @@ class ActiveGoalItem extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
-              await provider.deleteGoal(goal.id!);
+              await Provider.of<GoalProvider>(context, listen: false)
+                  .deleteGoal(goal.id!);
               Navigator.of(ctx).pop();
             },
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            child: const Text("Delete",
+                style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -342,21 +356,27 @@ class CompletedGoalsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final goalProvider = Provider.of<GoalProvider>(context);
-    final completedGoals = goalProvider.goals.where((goal) => goal.isCompleted).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Completed Goals",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        if (completedGoals.isNotEmpty)
-          ...completedGoals.map((goal) => CompletedGoalItem(goal: goal)).toList()
-        else
-          const Text("No completed goals."),
-      ],
+    return Consumer<GoalProvider>(
+      builder: (context, goalProvider, _) {
+        final completedGoals =
+            goalProvider.goals.where((goal) => goal.isCompleted).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Completed Goals",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            if (completedGoals.isNotEmpty)
+              ...completedGoals
+                  .map((goal) => CompletedGoalItem(goal: goal))
+                  .toList()
+            else
+              const Text("No completed goals."),
+          ],
+        );
+      },
     );
   }
 }
@@ -368,7 +388,6 @@ class CompletedGoalItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final goalProvider = Provider.of<GoalProvider>(context, listen: false);
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
       elevation: 2,
@@ -376,7 +395,8 @@ class CompletedGoalItem extends StatelessWidget {
       child: ListTile(
         title: Text(
           "${goal.name}: Completed",
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              fontSize: 16, fontWeight: FontWeight.bold),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -396,7 +416,8 @@ class CompletedGoalItem extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () async {
-                      await goalProvider.deleteGoal(goal.id!);
+                      await Provider.of<GoalProvider>(context, listen: false)
+                          .deleteGoal(goal.id!);
                       Navigator.of(ctx).pop();
                     },
                     child: const Text("Delete", style: TextStyle(color: Colors.red)),

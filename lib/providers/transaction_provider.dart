@@ -1,4 +1,3 @@
-// lib/providers/transaction_provider.dart
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -22,17 +21,22 @@ class TransactionProvider extends ChangeNotifier {
 
   List<TransactionModel> get transactions => _transactions;
 
-  double get computedIncome =>
-      _transactions.where((t) => t.type == "Income").fold(0, (prev, t) => prev + t.amount);
+  double get computedIncome => _transactions
+      .where((t) => t.type == "Income")
+      .fold(0, (prev, t) => prev + t.amount);
 
-  double get computedExpenses =>
-      _transactions.where((t) => t.type == "Expense").fold(0, (prev, t) => prev + t.amount);
+  double get computedExpenses => _transactions
+      .where((t) => t.type == "Expense")
+      .fold(0, (prev, t) => prev + t.amount);
 
   double get totalIncome => _manualIncome ?? computedIncome;
   double get totalExpenses => _manualExpenses ?? computedExpenses;
   double get budget => _manualBudget ?? defaultBudget;
 
   double get remaining => budget - totalExpenses;
+
+  /// Computes the net value from transactions (income minus expenses).
+  double get netWorth => totalIncome - totalExpenses;
 
   Future<void> initDb() async {
     final databasesPath = await getDatabasesPath();

@@ -1,4 +1,3 @@
-// lib/providers/goal_provider.dart
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -12,8 +11,8 @@ class GoalProvider extends ChangeNotifier {
 
   // Summary getters
   int get totalGoals => _goals.length;
-  int get completedGoals =>
-      _goals.where((goal) => goal.isCompleted).length;
+  int get completedGoals => _goals.where((goal) => goal.isCompleted).length;
+  
   double get overallProgress {
     if (_goals.isEmpty) return 0;
     double sumProgress = 0;
@@ -23,11 +22,10 @@ class GoalProvider extends ChangeNotifier {
     }
     return (sumProgress / _goals.length).clamp(0, 1);
   }
+  
   double get remainingAmount {
-    double totalTarget =
-        _goals.fold(0, (prev, goal) => prev + goal.targetAmount);
-    double totalSaved =
-        _goals.fold(0, (prev, goal) => prev + goal.savedAmount);
+    double totalTarget = _goals.fold(0, (prev, goal) => prev + goal.targetAmount);
+    double totalSaved = _goals.fold(0, (prev, goal) => prev + goal.savedAmount);
     return totalTarget - totalSaved;
   }
 
@@ -79,4 +77,7 @@ class GoalProvider extends ChangeNotifier {
     await _db!.delete('goals', where: 'id = ?', whereArgs: [id]);
     await fetchGoals();
   }
+  
+  // NOTE: For syncing with the overall dashboard, you might combine goal progress 
+  // with other data (such as assets and transactions) in a dedicated dashboard provider.
 }
