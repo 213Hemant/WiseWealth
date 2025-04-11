@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.flutterflasktemplate"
-    compileSdk = 34 // Explicitly define this (update if needed)
+    compileSdk = 35 // Explicitly define this (update if needed)
     ndkVersion = "26.1.10909125" // Use the correct NDK version from Flutter's `local.properties`
 
     compileOptions {
