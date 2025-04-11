@@ -32,6 +32,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+.packages
+
 
 # Symbolication related
 app.*.symbols
@@ -44,5 +46,23 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Android build files
+android/.gradle/
+android/app/build/
+android/build/
+
+# Local properties (contains SDK paths, should not be shared)
+android/local.properties
+
+# iOS build files
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/.last_build_id
+ios/Flutter/Flutter.podspec
+ios/build/
+
+# Firebase Files
+android/app/google-services.json
+ios/Runner/Info.plist
 # Python Related
 /backend/venv/
