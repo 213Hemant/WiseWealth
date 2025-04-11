@@ -1,156 +1,114 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:wisewealth/providers/profile_provider.dart';
-import 'package:wisewealth/providers/asset_provider.dart';
-import 'package:wisewealth/providers/transaction_provider.dart';
-import './view_bills.dart';
-import '../animations/animations.dart'; // Reusable animations
-import '../animations/transitions.dart';
+import 'package:wisewealth/models/transaction_model.dart';
+import '../providers/transaction_provider.dart';
+import 'home_screen.dart';
+import 'package:wisewealth/animations/transitions.dart';
 
-/// Header section displays a greeting and the user's net worth.
-class HeaderSection extends StatelessWidget {
-  const HeaderSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer2<ProfileProvider, AssetProvider>(
-      builder: (context, profileProvider, assetProvider, _) {
-        final profile = profileProvider.profile;
-        final netWorth = assetProvider.totalAssets;
-        return Card(
-          elevation: 3,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Good Morning, ${profile.name}!",
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Net Worth: ₹${netWorth.toStringAsFixed(2)}",
-                  style: const TextStyle(
-                      fontSize: 18, color: Colors.blueAccent),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Spending summary section calculates the expense for the current month and shows progress.
-class SpendingSummarySection extends StatelessWidget {
-  const SpendingSummarySection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<TransactionProvider>(
-      builder: (context, txnProvider, _) {
-        final now = DateTime.now();
-        final monthExpenses = txnProvider.transactions
-            .where((txn) =>
-                txn.type == "Expense" &&
-                txn.date.month == now.month &&
-                txn.date.year == now.year)
-            .fold(0.0, (prev, txn) => prev + txn.amount);
-        final budget = txnProvider.budget;
-        final double spentPercent =
-            (budget > 0) ? (monthExpenses / budget).clamp(0, 1) : 0.0;
-        return Card(
-          elevation: 3,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        "Spent this Month: ₹${monthExpenses.toStringAsFixed(2)} / ₹${budget.toStringAsFixed(2)}",
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                    Text(
-                      "${(spentPercent * 100).toStringAsFixed(0)}%",
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: spentPercent,
-                  color: Colors.blueAccent,
-                  backgroundColor: Colors.grey[300],
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "2 Bills Due This Week",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Buttons section with navigation to add expense and view bills.
-class ButtonsSection extends StatelessWidget {
-  const ButtonsSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              slideUpTransition(const AddExpenseScreen()),
-            );
-          },
-          child: const Text("Add Expense"),
-        ),
-        OutlinedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              slideUpTransition(const ViewBillsScreen()),
-            );
-          },
-          child: const Text("View Bills"),
-        ),
-      ],
-    );
-  }
-}
-
-/// Dummy AddExpenseScreen for navigation demonstration.
-class AddExpenseScreen extends StatelessWidget {
-    static const String routeName = '/add-expense'; // Added routeName property
+class AddExpenseScreen extends StatefulWidget {
+  static const String routeName = '/add-expense';
 
   const AddExpenseScreen({super.key});
 
   @override
+  State<AddExpenseScreen> createState() => _AddExpenseScreenState();
+}
+
+class _AddExpenseScreenState extends State<AddExpenseScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = DateTime.now();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final txnProvider = Provider.of<TransactionProvider>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Expense")),
-      body: const Center(child: Text("Add Expense Screen")),
+      appBar: AppBar(
+        title: const Text("Add Expense"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _amountController,
+                decoration: const InputDecoration(
+                  labelText: "Expense Amount",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return "Enter amount";
+                  if (double.tryParse(value) == null) return "Enter a valid number";
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: "Expense Description",
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) =>
+                    value == null || value.isEmpty ? "Enter description" : null,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedDate!,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      _selectedDate = pickedDate;
+                    });
+                  }
+                },
+                child: Text(
+                  "Select Date: ${_selectedDate!.toLocal().toString().split(' ')[0]}",
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    // Create a new expense transaction.
+                    // Assuming your TransactionModel has fields: name, amount, type, category, and date.
+                    // For expense, we'll use type "Expense" and a default category "General".
+                    final expenseTxn = TransactionModel(
+                      name: _descriptionController.text,
+                      amount: double.parse(_amountController.text),
+                      type: "Expense",
+                      category: "General",
+                      date: _selectedDate!,
+                    );
+                    await txnProvider.addTransaction(expenseTxn);
+                    Navigator.pushReplacement(
+                      context,
+                      slideDownTransition(const HomeScreen()),
+                    );
+                  }
+                },
+                child: const Text("Add Expense"),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
