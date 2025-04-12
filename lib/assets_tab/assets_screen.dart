@@ -1,5 +1,6 @@
 // lib/assets_tab/assets_screen.dart
 import 'package:flutter/material.dart';
+import '../widgets/gyro_drawer_wrapper.dart';
 import 'assets_widgets.dart';
 import '../home/bottom_navbar.dart';
 import 'add_asset.dart';
@@ -13,7 +14,8 @@ class AssetsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+   return GyroDrawerWrapper(
+      child:Scaffold(
       appBar: AppBar(
         title: const Text("Your Assets"),
         centerTitle: true,
@@ -45,6 +47,7 @@ class AssetsScreen extends StatelessWidget {
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 1),
+      ),
     );
   }
 }

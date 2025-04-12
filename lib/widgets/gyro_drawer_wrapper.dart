@@ -1,4 +1,3 @@
-// lib/widgets/gyro_drawer_wrapper.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -18,18 +17,31 @@ class GyroDrawerWrapper extends StatefulWidget {
 class _GyroDrawerWrapperState extends State<GyroDrawerWrapper> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   StreamSubscription? _gyroSubscription;
+  bool _isDrawerOpen = false;
+  final double _openThreshold = 3.0;
+  final double _closeThreshold = -3.0;
+  DateTime _lastTriggerTime = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    // Check if a user is logged in using your AuthService
     bool isLoggedIn = AuthService().currentUser != null;
+
     if (isLoggedIn) {
       _gyroSubscription = gyroscopeEvents.listen((GyroscopeEvent event) {
-        // event.y > threshold implies a left-to-right tilt.
-        // Adjust the threshold as necessary.
-        if (event.y > 3.0 && !(_scaffoldKey.currentState?.isDrawerOpen ?? false)) {
+        final now = DateTime.now();
+
+        // Debounce gesture every 500ms
+        if (now.difference(_lastTriggerTime).inMilliseconds < 500) return;
+
+        if (event.y > _openThreshold && !_isDrawerOpen) {
           _scaffoldKey.currentState?.openDrawer();
+          _isDrawerOpen = true;
+          _lastTriggerTime = now;
+        } else if (event.y < _closeThreshold && _isDrawerOpen) {
+          Navigator.of(context).pop(); // closes the drawer
+          _isDrawerOpen = false;
+          _lastTriggerTime = now;
         }
       });
     }
@@ -46,6 +58,10 @@ class _GyroDrawerWrapperState extends State<GyroDrawerWrapper> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: const SideMenu(),
+      onDrawerChanged: (isOpened) {
+        // Keeps track of drawer state
+        _isDrawerOpen = isOpened;
+      },
       body: widget.child,
     );
   }
