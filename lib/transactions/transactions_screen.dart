@@ -1,5 +1,6 @@
 // lib/transactions/transactions_screen.dart
 import 'package:flutter/material.dart';
+import '../widgets/gyro_drawer_wrapper.dart';
 import 'package:provider/provider.dart';
 import 'transactions_widgets.dart';
 import '../home/bottom_navbar.dart';
@@ -47,7 +48,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         break;
     }
 
-    return Scaffold(
+    return GyroDrawerWrapper(
+      child:Scaffold(
       appBar: AppBar(
         title: const Text("Transactions"),
         centerTitle: true,
@@ -91,6 +93,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 2),
+    ),
     );
   }
 }

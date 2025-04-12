@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/gyro_drawer_wrapper.dart';
 import 'home_widgets.dart';
 import 'bottom_navbar.dart';
 import 'side_menu.dart';
@@ -11,7 +12,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GyroDrawerWrapper(
+      child: Scaffold(
       appBar: AppBar(
         title: const Text("Finance Manager"),
         centerTitle: true,
@@ -36,6 +38,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
+    ),
     );
   }
 }

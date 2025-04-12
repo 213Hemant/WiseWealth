@@ -1,6 +1,7 @@
 // lib/goals/goals_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../widgets/gyro_drawer_wrapper.dart';
 import 'goals_widgets.dart';
 import 'new_goal_screen.dart';
 import '../home/bottom_navbar.dart';
@@ -15,9 +16,10 @@ class GoalsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure that GoalProvider is accessible.
     final goalProvider = Provider.of<GoalProvider>(context);
-    return Scaffold(
+    // Ensure that GoalProvider is accessible.
+   return GyroDrawerWrapper(
+      child: Scaffold(
       appBar: AppBar(
         title: const Text("Your Goals"),
         centerTitle: true,
@@ -49,6 +51,7 @@ class GoalsScreen extends StatelessWidget {
         backgroundColor: Colors.green,
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 3),
+    ),
     );
   }
 }
