@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';  // Added FirebaseAuth import
 import 'providers/profile_provider.dart';
 import 'providers/asset_provider.dart';
 import 'providers/transaction_provider.dart';
