@@ -27,11 +27,22 @@ class ProfilePage extends StatelessWidget {
           children: [
             Center(
               child: scaleIn(
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundImage: profile.imagePath != null
-                      ? FileImage(File(profile.imagePath!))
-                      : const AssetImage('assets/profile.png') as ImageProvider,
+                child: GestureDetector(
+                  onTap: () {
+                    // Navigate to EditProfilePage to allow photo update
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EditProfilePage(),
+                      ),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundImage: profile.imagePath != null
+                        ? FileImage(File(profile.imagePath!))
+                        : const AssetImage('assets/profile.png') as ImageProvider,
+                  ),
                 ),
               ),
             ),

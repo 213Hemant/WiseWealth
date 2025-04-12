@@ -1,6 +1,4 @@
-// screens/edit_profile_page.dart
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -32,10 +30,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _imagePath = profile.imagePath;
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 75);
+    final pickedFile = await picker.pickImage(source: source, imageQuality: 75);
     if (pickedFile != null) {
       setState(() {
         _imagePath = pickedFile.path;
@@ -75,14 +72,36 @@ class _EditProfilePageState extends State<EditProfilePage> {
           child: ListView(
             children: [
               GestureDetector(
-                onTap: _pickImage,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text("Choose an Option"),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _pickImage(ImageSource.camera); // Pick image from camera
+                          },
+                          child: const Text("Camera"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _pickImage(ImageSource.gallery); // Pick image from gallery
+                          },
+                          child: const Text("Gallery"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
                 child: Center(
                   child: CircleAvatar(
                     radius: 50,
                     backgroundImage: _imagePath != null
                         ? FileImage(File(_imagePath!))
-                        : const AssetImage('assets/profile.png')
-                            as ImageProvider,
+                        : const AssetImage('assets/profile.png') as ImageProvider,
                   ),
                 ),
               ),

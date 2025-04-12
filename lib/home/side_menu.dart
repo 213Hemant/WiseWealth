@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'dart:io';  // Add this import
+import 'package:provider/provider.dart';
 import '../animations/animations.dart';
 import '../animations/transitions.dart';
 import '../side_menu/profile.dart';
 import '../side_menu/about.dart';
 import '../side_menu/news.dart'; // Import NewsPage
+import '../providers/profile_provider.dart'; // Import the ProfileProvider
 
 class SideMenu extends StatelessWidget {
   const SideMenu({super.key});
@@ -14,16 +17,25 @@ class SideMenu extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
+          // DrawerHeader with dynamic profile photo
           DrawerHeader(
             decoration: const BoxDecoration(color: Colors.blue),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                scaleIn(
-                  child: const CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage('assets/profile.png'),
-                  ),
+                // Use Consumer to listen to ProfileProvider and update the UI when the profile changes
+                Consumer<ProfileProvider>(
+                  builder: (context, profileProvider, child) {
+                    final profile = profileProvider.profile;
+                    return scaleIn(
+                      child: CircleAvatar(
+                        radius: 30,
+                        backgroundImage: profile.imagePath != null
+                            ? FileImage(File(profile.imagePath!))
+                            : const AssetImage('assets/profile.png') as ImageProvider,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 10),
                 fadeIn(
