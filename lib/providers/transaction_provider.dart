@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';  // Firestore import
+import 'package:firebase_auth/firebase_auth.dart';         // FirebaseAuth import
 import '../models/transaction_model.dart';
 
 class TransactionProvider extends ChangeNotifier {
@@ -73,12 +75,18 @@ class TransactionProvider extends ChangeNotifier {
     if (_db == null) return;
     await _db!.insert('transactions', transaction.toMap());
     await fetchTransactions();
+
+    // After local insert, sync to Firestore.
+    await _syncTransactionToFirestore(transaction);
   }
 
   Future<void> deleteTransaction(int id) async {
     if (_db == null) return;
     await _db!.delete('transactions', where: 'id = ?', whereArgs: [id]);
     await fetchTransactions();
+
+    // After local deletion, you may want to remove the transaction from Firestore.
+    await _deleteTransactionFromFirestore(id);
   }
 
   /// Allows user to manually override income, expenses, and budget.
@@ -95,5 +103,54 @@ class TransactionProvider extends ChangeNotifier {
     _manualExpenses = null;
     _manualBudget = null;
     notifyListeners();
+  }
+
+  /// PRIVATE: Sync a transaction to Firestore.
+  Future<void> _syncTransactionToFirestore(TransactionModel transaction) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Under /users/{uid}/transactions collection
+        final firestoreRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('transactions');
+
+        await firestoreRef.add({
+          'name': transaction.name,
+          'amount': transaction.amount,
+          'type': transaction.type,
+          'category': transaction.category,
+          'date': transaction.date.toIso8601String(),
+          // Optionally, add a timestamp for conflict resolution.
+          'syncedAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (e) {
+      // Log error; you may also want to add retry logic or mark the local record as pending.
+      print("Error syncing transaction: $e");
+    }
+  }
+
+  /// PRIVATE: Delete a transaction from Firestore.
+  Future<void> _deleteTransactionFromFirestore(int transactionId) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final firestoreRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('transactions');
+
+        // In this simple example, we assume that the Firestore document has a field 'id' matching the SQLite id.
+        // If you need to map these IDs, you might have to store the Firestore document id locally.
+        final snapshot = await firestoreRef.where('id', isEqualTo: transactionId).get();
+        for (var doc in snapshot.docs) {
+          await doc.reference.delete();
+        }
+      }
+    } catch (e) {
+      print("Error deleting transaction from Firestore: $e");
+    }
   }
 }
